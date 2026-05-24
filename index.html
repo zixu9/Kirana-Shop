@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kirana Pro — Shop Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body class="light-mode">
+
+<!-- ═══ LOGIN PAGE ═══════════════════════════════════════════════════════════ -->
+<div id="login-page" class="login-overlay" style="display:none">
+  <div class="login-card">
+    <div class="login-logo">
+      <span class="logo-icon">🛒</span>
+      <h1>Kirana Pro</h1>
+      <p>Shop Management System</p>
+    </div>
+    <form id="login-form" autocomplete="off">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="login-username" placeholder="admin" required autofocus>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" id="login-btn">
+        Sign In →
+      </button>
+      <p class="login-hint">Default: admin / admin123</p>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ MAIN APP ══════════════════════════════════════════════════════════════ -->
+<div id="app" style="display:none">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="logo-icon">🛒</span>
+      <div>
+        <h2>Kirana Pro</h2>
+        <span id="shop-user" class="user-badge">Admin</span>
+      </div>
+      <button class="sidebar-toggle" id="sidebar-close">✕</button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-page="dashboard">
+        <span class="nav-icon">📊</span><span>Dashboard</span>
+      </a>
+      <a href="#" class="nav-item" data-page="inventory">
+        <span class="nav-icon">📦</span><span>Inventory</span>
+        <span class="badge" id="low-stock-badge" style="display:none">!</span>
+      </a>
+      <a href="#" class="nav-item" data-page="billing">
+        <span class="nav-icon">🧾</span><span>Billing</span>
+      </a>
+      <a href="#" class="nav-item" data-page="customers">
+        <span class="nav-icon">👥</span><span>Customers</span>
+      </a>
+      <a href="#" class="nav-item" data-page="credits">
+        <span class="nav-icon">💳</span><span>Udhaar</span>
+      </a>
+      <a href="#" class="nav-item" data-page="suppliers">
+        <span class="nav-icon">🏭</span><span>Suppliers</span>
+      </a>
+      <a href="#" class="nav-item" data-page="purchases">
+        <span class="nav-icon">🚚</span><span>Purchases</span>
+      </a>
+      <a href="#" class="nav-item" data-page="reports">
+        <span class="nav-icon">📈</span><span>Reports</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-icon" id="dark-mode-toggle" title="Toggle dark mode">🌙</button>
+      <button class="btn-icon" id="logout-btn" title="Logout">🚪</button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="topbar">
+      <button class="hamburger" id="sidebar-open">☰</button>
+      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div class="topbar-actions">
+        <div class="search-global" id="global-search-wrap" style="display:none">
+          <input type="text" id="global-search" placeholder="🔍 Search products..." autocomplete="off">
+        </div>
+        <span class="topbar-time" id="topbar-clock"></span>
+      </div>
+    </header>
+
+    <!-- Toast notifications -->
+    <div id="toast-container"></div>
+
+    <!-- Pages -->
+    <div class="page-content">
+
+      <!-- ── DASHBOARD ─────────────────────────────────────────────────── -->
+      <section id="page-dashboard" class="page active">
+        <div class="stat-grid" id="dashboard-stats">
+          <div class="stat-card stat-sales">
+            <div class="stat-icon">💰</div>
+            <div><div class="stat-label">Today's Sales</div><div class="stat-value" id="stat-sales">₹0</div></div>
+          </div>
+          <div class="stat-card stat-udhaar">
+            <div class="stat-icon">📋</div>
+            <div><div class="stat-label">Pending Udhaar</div><div class="stat-value" id="stat-udhaar">₹0</div></div>
+          </div>
+          <div class="stat-card stat-products">
+            <div class="stat-icon">📦</div>
+            <div><div class="stat-label">Total Products</div><div class="stat-value" id="stat-products">0</div></div>
+          </div>
+          <div class="stat-card stat-alert">
+            <div class="stat-icon">⚠️</div>
+            <div><div class="stat-label">Low Stock Items</div><div class="stat-value" id="stat-lowstock">0</div></div>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3>Recent Transactions</h3>
+              <a href="#" class="link" data-page="billing">View all →</a>
+            </div>
+            <table class="table" id="recent-tx-table">
+              <thead><tr><th>Invoice</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
+              <tbody id="recent-tx-body"></tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Low Stock Alert</h3>
+              <a href="#" class="link" data-page="inventory">Manage →</a>
+            </div>
+            <div id="low-stock-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── INVENTORY ─────────────────────────────────────────────────── -->
+      <section id="page-inventory" class="page">
+        <div class="page-toolbar">
+          <input type="text" class="search-box" id="product-search" placeholder="🔍 Search or scan barcode...">
+          <select id="category-filter" class="select-box">
+            <option value="">All Categories</option>
+          </select>
+          <label class="checkbox-label">
+            <input type="checkbox" id="low-stock-filter"> Low stock only
+          </label>
+          <button class="btn btn-primary" id="add-product-btn">+ Add Product</button>
+        </div>
+
+        <div class="card">
+          <table class="table" id="product-table">
+            <thead>
+              <tr>
+                <th>Product</th><th>Category</th><th>Barcode</th>
+                <th>Buy Price</th><th>Sell Price</th><th>Stock</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="product-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── BILLING ───────────────────────────────────────────────────── -->
+      <section id="page-billing" class="page">
+        <div class="billing-layout">
+          <div class="billing-left">
+            <div class="card">
+              <div class="card-header"><h3>Product Search</h3></div>
+              <input type="text" id="bill-product-search" class="search-box" placeholder="🔍 Search or scan barcode..." autofocus>
+              <div id="bill-product-results" class="product-results"></div>
+            </div>
+
+            <div class="card mt-1">
+              <div class="card-header"><h3>Recent Invoices</h3></div>
+              <table class="table table-sm">
+                <thead><tr><th>Invoice</th><th>Total</th><th>Status</th><th></th></tr></thead>
+                <tbody id="recent-invoices-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="billing-right">
+            <div class="card bill-card">
+              <div class="card-header">
+                <h3>🧾 New Bill</h3>
+                <select id="bill-customer" class="select-box-sm">
+                  <option value="">Walk-in Customer</option>
+                </select>
+              </div>
+
+              <div id="bill-items" class="bill-items">
+                <p class="empty-msg">Add products from the left panel</p>
+              </div>
+
+              <div class="bill-totals">
+                <div class="total-row"><span>Subtotal</span><span id="bill-subtotal">₹0.00</span></div>
+                <div class="total-row">
+                  <span>Discount (₹)</span>
+                  <input type="number" id="bill-discount" class="total-input" value="0" min="0">
+                </div>
+                <div class="total-row">
+                  <span>Tax (₹)</span>
+                  <input type="number" id="bill-tax" class="total-input" value="0" min="0">
+                </div>
+                <div class="total-row total-final">
+                  <span>Total</span><span id="bill-total">₹0.00</span>
+                </div>
+                <div class="total-row">
+                  <span>Paid Amount</span>
+                  <input type="number" id="bill-paid" class="total-input" placeholder="Enter amount">
+                </div>
+                <div class="total-row balance-row">
+                  <span>Balance</span><span id="bill-balance">₹0.00</span>
+                </div>
+              </div>
+
+              <div class="bill-actions">
+                <select id="bill-payment-mode" class="select-box">
+                  <option value="cash">💵 Cash</option>
+                  <option value="upi">📱 UPI</option>
+                  <option value="card">💳 Card</option>
+                  <option value="credit">📋 Credit (Udhaar)</option>
+                </select>
+                <div class="btn-row">
+                  <button class="btn btn-outline" id="clear-bill-btn">Clear</button>
+                  <button class="btn btn-success" id="save-bill-btn">Save Bill ✓</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── CUSTOMERS ─────────────────────────────────────────────────── -->
+      <section id="page-customers" class="page">
+        <div class="page-toolbar">
+          <input type="text" class="search-box" id="customer-search" placeholder="🔍 Search customers...">
+          <button class="btn btn-primary" id="add-customer-btn">+ Add Customer</button>
+        </div>
+        <div class="card">
+          <table class="table" id="customer-table">
+            <thead>
+              <tr><th>Name</th><th>Phone</th><th>Address</th><th>Credit Limit</th><th>Balance</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="customer-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── CREDITS (UDHAAR) ──────────────────────────────────────────── -->
+      <section id="page-credits" class="page">
+        <div class="page-toolbar">
+          <h3 class="section-title">💳 Udhaar Khata (Credit Ledger)</h3>
+          <button class="btn btn-primary" id="add-payment-btn">+ Record Payment</button>
+        </div>
+        <div class="card">
+          <table class="table" id="credit-table">
+            <thead>
+              <tr><th>Customer</th><th>Phone</th><th>Pending Amount</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="credit-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── SUPPLIERS ─────────────────────────────────────────────────── -->
+      <section id="page-suppliers" class="page">
+        <div class="page-toolbar">
+          <input type="text" class="search-box" id="supplier-search" placeholder="🔍 Search suppliers...">
+          <button class="btn btn-primary" id="add-supplier-btn">+ Add Supplier</button>
+        </div>
+        <div class="card">
+          <table class="table" id="supplier-table">
+            <thead>
+              <tr><th>Name</th><th>Phone</th><th>Email</th><th>GSTIN</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="supplier-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── PURCHASES ─────────────────────────────────────────────────── -->
+      <section id="page-purchases" class="page">
+        <div class="page-toolbar">
+          <h3 class="section-title">🚚 Purchase Records</h3>
+          <button class="btn btn-primary" id="add-purchase-btn">+ New Purchase</button>
+        </div>
+        <div class="card">
+          <table class="table" id="purchase-table">
+            <thead>
+              <tr><th>Date</th><th>Product</th><th>Supplier</th><th>Qty</th><th>Price</th><th>Total</th><th>Paid</th></tr>
+            </thead>
+            <tbody id="purchase-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── REPORTS ───────────────────────────────────────────────────── -->
+      <section id="page-reports" class="page">
+        <div class="report-tabs">
+          <button class="tab-btn active" data-report="daily">Daily</button>
+          <button class="tab-btn" data-report="monthly">Monthly</button>
+          <button class="tab-btn" data-report="profit">Profit/Loss</button>
+          <button class="tab-btn" data-report="credit">Pending Credit</button>
+        </div>
+
+        <div class="card" id="report-container">
+          <div class="report-controls" id="report-controls"></div>
+          <div id="report-content"></div>
+        </div>
+      </section>
+
+    </div><!-- /page-content -->
+  </main>
+</div><!-- /app -->
+
+<!-- ═══ MODALS ════════════════════════════════════════════════════════════════ -->
+
+<!-- Product Modal -->
+<div class="modal-backdrop" id="product-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="product-modal-title">Add Product</h3>
+      <button class="modal-close" data-modal="product-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="product-id">
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label>Product Name *</label>
+          <input type="text" id="product-name" placeholder="e.g. Aashirvaad Atta 5kg">
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="product-category"><option value="">Select category</option></select>
+        </div>
+        <div class="form-group">
+          <label>Barcode</label>
+          <input type="text" id="product-barcode" placeholder="Scan or enter barcode">
+        </div>
+        <div class="form-group">
+          <label>Purchase Price (₹) *</label>
+          <input type="number" id="product-buy-price" placeholder="0.00" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Selling Price (₹) *</label>
+          <input type="number" id="product-sell-price" placeholder="0.00" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Stock Quantity</label>
+          <input type="number" id="product-stock" placeholder="0" min="0">
+        </div>
+        <div class="form-group">
+          <label>Low Stock Alert</label>
+          <input type="number" id="product-low-alert" placeholder="10" min="0">
+        </div>
+        <div class="form-group">
+          <label>Unit</label>
+          <select id="product-unit">
+            <option value="pcs">Pieces</option>
+            <option value="kg">Kg</option>
+            <option value="g">Grams</option>
+            <option value="L">Litre</option>
+            <option value="ml">ml</option>
+            <option value="bag">Bag</option>
+            <option value="bottle">Bottle</option>
+            <option value="strip">Strip</option>
+            <option value="box">Box</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-modal="product-modal">Cancel</button>
+      <button class="btn btn-primary" id="save-product-btn">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- Customer Modal -->
+<div class="modal-backdrop" id="customer-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="customer-modal-title">Add Customer</h3>
+      <button class="modal-close" data-modal="customer-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="customer-id">
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label>Full Name *</label>
+          <input type="text" id="customer-name" placeholder="e.g. Ramesh Kumar">
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="customer-phone" placeholder="9876543210">
+        </div>
+        <div class="form-group">
+          <label>Credit Limit (₹)</label>
+          <input type="number" id="customer-credit-limit" value="5000" min="0">
+        </div>
+        <div class="form-group form-full">
+          <label>Address</label>
+          <textarea id="customer-address" rows="2" placeholder="Enter address"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-modal="customer-modal">Cancel</button>
+      <button class="btn btn-primary" id="save-customer-btn">Save Customer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Supplier Modal -->
+<div class="modal-backdrop" id="supplier-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="supplier-modal-title">Add Supplier</h3>
+      <button class="modal-close" data-modal="supplier-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="supplier-id">
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label>Supplier Name *</label>
+          <input type="text" id="supplier-name" placeholder="e.g. Patna Wholesale Hub">
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" id="supplier-phone" placeholder="9900112233">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="supplier-email" placeholder="supplier@email.com">
+        </div>
+        <div class="form-group">
+          <label>GSTIN</label>
+          <input type="text" id="supplier-gstin" placeholder="GST number">
+        </div>
+        <div class="form-group form-full">
+          <label>Address</label>
+          <textarea id="supplier-address" rows="2" placeholder="Enter address"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-modal="supplier-modal">Cancel</button>
+      <button class="btn btn-primary" id="save-supplier-btn">Save Supplier</button>
+    </div>
+  </div>
+</div>
+
+<!-- Purchase Modal -->
+<div class="modal-backdrop" id="purchase-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Record Purchase</h3>
+      <button class="modal-close" data-modal="purchase-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label>Product *</label>
+          <select id="purchase-product"><option value="">Select product</option></select>
+        </div>
+        <div class="form-group">
+          <label>Supplier</label>
+          <select id="purchase-supplier"><option value="">Select supplier</option></select>
+        </div>
+        <div class="form-group">
+          <label>Quantity *</label>
+          <input type="number" id="purchase-qty" min="1" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label>Purchase Price (₹) *</label>
+          <input type="number" id="purchase-price" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label>Amount Paid (₹)</label>
+          <input type="number" id="purchase-paid" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <input type="text" id="purchase-notes" placeholder="Optional notes">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-modal="purchase-modal">Cancel</button>
+      <button class="btn btn-primary" id="save-purchase-btn">Save Purchase</button>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Modal (for Udhaar) -->
+<div class="modal-backdrop" id="payment-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3 id="payment-modal-title">Record Payment</h3>
+      <button class="modal-close" data-modal="payment-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="payment-customer-id">
+      <div class="form-group">
+        <label>Customer</label>
+        <select id="payment-customer"><option value="">Select customer</option></select>
+      </div>
+      <div class="form-group">
+        <label>Current Balance</label>
+        <div id="payment-current-balance" class="balance-display">₹0.00</div>
+      </div>
+      <div class="form-group">
+        <label>Payment Amount (₹) *</label>
+        <input type="number" id="payment-amount" min="0.01" step="0.01" placeholder="0.00">
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <input type="text" id="payment-notes" placeholder="e.g. Cash payment received">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" data-modal="payment-modal">Cancel</button>
+      <button class="btn btn-success" id="save-payment-btn">Record Payment</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ledger Modal -->
+<div class="modal-backdrop" id="ledger-modal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 id="ledger-modal-title">Customer Ledger</h3>
+      <button class="modal-close" data-modal="ledger-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="ledger-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Invoice Print Modal -->
+<div class="modal-backdrop" id="invoice-modal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3>Invoice</h3>
+      <div>
+        <button class="btn btn-outline btn-sm" onclick="window.print()">🖨️ Print</button>
+        <button class="modal-close" data-modal="invoice-modal">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" id="invoice-print-area">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
